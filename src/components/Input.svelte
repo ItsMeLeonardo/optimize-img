@@ -16,14 +16,19 @@
     const target = e.target as HTMLInputElement
 
     if (type === 'number' && min && max) {
-      const value = Number(target.value)
+      const numberValue = Number(target.value)
 
-      if (value < min) {
+      if (target.value.trim() === '') {
+        value = ''
+        return
+      }
+
+      if (numberValue < min) {
         target.value = String(min)
         return
       }
 
-      if (value > max) {
+      if (numberValue > max) {
         target.value = String(max)
         return
       }
