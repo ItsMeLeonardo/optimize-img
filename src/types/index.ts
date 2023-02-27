@@ -1,4 +1,4 @@
-export type ImageExtension = 'png' | 'jpg' | 'jpeg' | 'webp' | 'svg'
+export type ImageFormat = 'png' | 'jpg' | 'webp'
 
 export type Colors = 'primary' | 'secondary' | 'tertiary' | 'neutral'
 

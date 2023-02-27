@@ -1,3 +1,3 @@
-import type { ImageExtension } from 'src/types'
+import type { ImageFormat } from 'src/types'
 
-export const IMAGE_EXTENSIONS: ImageExtension[] = ['png', 'jpg', 'jpeg', 'webp', 'svg']
+export const IMAGE_EXTENSIONS: ImageFormat[] = ['png', 'jpg', 'webp']
