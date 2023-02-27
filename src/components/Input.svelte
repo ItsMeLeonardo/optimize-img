@@ -8,7 +8,7 @@
     | 'tel'
     | 'url'
   export const type: HTMLInputTypeAttribute = 'text'
-  export let value: string = ''
+  export let value: string | number = ''
 
   const handleInput = (e: Event) => {
     const target = e.target as HTMLInputElement
