@@ -5,7 +5,10 @@
   import Button from './Button.svelte'
   import Item from './Item.svelte'
 
+  type Filters = 'all' | 'low' | 'medium' | 'high'
+
   let images: CustomImage[]
+  let filter: Filters = 'all'
 
   function getAllImages() {
     const docImages = document.querySelectorAll('img')
@@ -70,7 +73,7 @@
 </script>
 
 <main class="p-1 w-80 bg-neutral-50">
-  <div class="p-5 flex flex-col gap-2 justify-center items-center">
+  <div class="p-5 pb-2 flex flex-col gap-2 justify-center items-center">
     <h1
       class="mx-auto text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
     >
@@ -90,11 +93,61 @@
   </div>
 
   {#if images}
+    {#if images.length}
+      <div class="w-full flex my-2">
+        <button
+          class="flex-grow flex items-center justify-center gap-2 font-bold  rounded py-1 px-4 hover:text-indigo-500"
+          class:bg-white={filter === 'all'}
+          on:click={() => (filter = 'all')}
+        >
+          All
+        </button>
+
+        <button
+          class="flex items-center justify-center gap-2 flex-grow rounded py-1 px-4 hover:text-red-500"
+          class:bg-white={filter === 'low'}
+          class:text-red-500={filter === 'low'}
+          on:click={() => (filter = 'low')}
+        >
+          <span>Low</span>
+          <i class="iconoir-emoji-talking-angry text-xl" />
+        </button>
+
+        <button
+          class="flex items-center justify-center gap-2 flex-grow rounded py-1 px-4 hover:text-yellow-500"
+          class:bg-white={filter === 'medium'}
+          class:text-yellow-500={filter === 'medium'}
+          on:click={() => (filter = 'medium')}
+        >
+          <span>medium</span>
+          <i class="iconoir-emoji-surprise-alt text-xl" />
+        </button>
+
+        <button
+          class="flex items-center justify-center gap-2 flex-grow rounded py-1 px-4 hover:text-green-500"
+          class:bg-white={filter === 'high'}
+          class:text-green-500={filter === 'high'}
+          on:click={() => (filter = 'high')}
+        >
+          <span>high</span>
+          <i class="iconoir-emoji text-xl" />
+        </button>
+      </div>
+    {/if}
+
     <ul class="flex flex-col gap-2">
       {#each images as image}
         <Item {image} />
       {:else}
-        <li class="w-full text-center p-2">no images</li>
+        <li
+          class="w-full text-center px-8 py-4 flex flex-col gap-2 items-center justify-center"
+        >
+          <i class="iconoir-emoji-puzzled text-2xl" />
+          <span>
+            Sorry, we couldn't find any images in this page.
+            <span class="text-purple-600">Try again in another page.</span>
+          </span>
+        </li>
       {/each}
     </ul>
   {/if}
