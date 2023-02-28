@@ -1,5 +1,6 @@
 <script lang="ts">
   import { fade } from 'svelte/transition'
+
   import type { CustomImage } from 'src/types'
   import Button from './Button.svelte'
   import Item from './Item.svelte'
@@ -11,7 +12,6 @@
     const imageList = Array.from(docImages).slice(0, 10)
 
     imageList.forEach((img, index) => {
-      img.style.border = '5px dashed purple'
       img.setAttribute('data-extension-id', img.src)
     })
 
@@ -47,7 +47,7 @@
       .query({ active: true, currentWindow: true })
       .catch(err => console.log({ err }))
 
-    chrome.scripting.executeScript({
+    await chrome.scripting.executeScript({
       target: { tabId: tabs[0].id },
       func: getAllImages,
     })
@@ -57,10 +57,6 @@
     const images = request.images
     setImage(images)
   })
-
-  function getImage() {
-    return images
-  }
 
   function setImage(value: CustomImage[]) {
     images = value
