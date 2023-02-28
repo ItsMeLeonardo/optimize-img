@@ -75,7 +75,7 @@
 >
   <section>
     <header class="mb-2">
-      <h3 class="text-sm font-bold">Image detials: zzz</h3>
+      <h3 class="text-sm font-bold">Image detials:</h3>
     </header>
     <div class="grid grid-cols-2 gap-x-6">
       <div class="flex gap-1">
