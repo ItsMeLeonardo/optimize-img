@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte'
+
   type HTMLInputTypeAttribute =
     | 'text'
     | 'password'
@@ -12,30 +14,25 @@
   export let min: number | string = ''
   export let max: number | string = ''
 
+  const dispatch = createEventDispatcher<{ input: { value: string } }>()
+
   const handleInput = (e: Event) => {
     const target = e.target as HTMLInputElement
 
-    if (type === 'number' && min && max) {
+    if (type === 'number' && target.value.trim().length && min && max) {
       const numberValue = Number(target.value)
-
-      if (target.value.trim() === '') {
-        value = ''
-        return
-      }
 
       if (numberValue < min) {
         target.value = String(min)
-        return
       }
 
       if (numberValue > max) {
         target.value = String(max)
-        return
       }
-
-      return
     }
-
+    dispatch('input', {
+      value: target.value,
+    })
     value = target.value
   }
 </script>
