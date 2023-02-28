@@ -2,7 +2,7 @@
   import type { Colors } from 'src/types'
 
   export let color: Colors = 'primary'
-  export let active = false
+  export let checked = false
 
   const activeColors: Record<Colors, string> = {
     neutral: 'bg-neutral-400/5 text-neutral-400',
@@ -11,7 +11,7 @@
     tertiary: 'bg-tertiary/10 text-tertiary',
   }
 
-  const activeColor = active ? activeColors[color] : 'bg-neutral-400/5 text-neutral-400 '
+  $: activeColor = checked ? activeColors[color] : 'bg-neutral-400/5 text-neutral-400 '
 </script>
 
 <button
