@@ -1,6 +1,6 @@
-export * from './numbers'
+import type { Performance } from 'src/types'
 
-export type Performance = 'low' | 'medium' | 'high'
+export * from './numbers'
 
 const HIGH_INTERVAL = 100
 const MEDIUM_INTERVAL = 200

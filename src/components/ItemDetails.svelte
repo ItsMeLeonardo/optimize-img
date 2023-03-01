@@ -5,9 +5,7 @@
   import Input from './Input.svelte'
   import Button from './Button.svelte'
   import { optimizeImage } from '../service'
-  import type { ImageFormat } from 'src/types'
-
-  type ResizeType = 'PERCETAGE' | 'PIXELS' | 'RENDERED'
+  import type { ImageFormat, ResizeType } from 'src/types'
 
   export let url: string
   export let height: number

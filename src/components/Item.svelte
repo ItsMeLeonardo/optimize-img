@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { slide } from 'svelte/transition'
-  import { quintOut } from 'svelte/easing'
   import type { CustomImage } from 'src/types'
 
   import { getPercentageRatio } from '../utils'
@@ -8,8 +6,7 @@
   import Button from './Button.svelte'
   import Loader from './Loader.svelte'
   import { getRemoteImageSize } from '../utils/image'
-  import Input from './Input.svelte'
-  import ButtonCheck from './ButtonCheck.svelte'
+
   import ItemDetails from './ItemDetails.svelte'
 
   export let image: CustomImage
@@ -19,7 +16,18 @@
   let error = false
   let quality = 70
 
-  const { alt, height, originalHeight, originalWidth, src, width, coordinates } = image
+  const {
+    alt,
+    height,
+    originalHeight,
+    originalWidth,
+    src,
+    width,
+    coordinates,
+    performance,
+    size: originalSize,
+    sizeLabel: originalLabel,
+  } = image
 
   let optimizedUrl: string = optimizeImage({
     url: src,
@@ -70,113 +78,95 @@
   function toggleDetails() {
     showDetails = !showDetails
   }
-
-  const promise = getRemoteImageSize(src)
 </script>
 
-{#if !error}
-  <li class="w-full rounded-lg" class:bg-white={showDetails}>
-    <div class="flex w-full h-[60px] p-2 gap-2 items-center rounded-xl">
-      {#await promise}
-        <div class="flex-grow flex justify-center items-center gap-2  ">
-          <div class="w-4 aspect-square border-2 border-slate-500" />
-
-          <div
-            class="aspect-square w-6 flex items-center justify-center bg-slate-200 rounded-sm"
-          />
-
-          <span class="flex-grow bg-slate-200 rounded-md h-3" />
-        </div>
-      {:then { sizeLabel: originalLabel, performance, bytes: originalBytes }}
-        <label
-          for=""
-          class="flex-grow h-full w-full flex justify-center items-center gap-2 cursor-pointer"
+<li class="w-full rounded-lg" class:bg-white={showDetails}>
+  <div class="flex w-full h-[60px] p-2 gap-2 items-center rounded-xl">
+    <label
+      for=""
+      class="flex-grow h-full w-full flex justify-center items-center gap-2 cursor-pointer"
+    >
+      <!-- <div
+          class="w-4 aspect-square border-2 border-slate-500 rounded flex justify-center items-center focus-within:ring"
+          class:bg-slate-500={checked}
         >
-          <!-- <div
-            class="w-4 aspect-square border-2 border-slate-500 rounded flex justify-center items-center focus-within:ring"
-            class:bg-slate-500={checked}
-          >
-            <input
-              type="checkbox"
-              bind:checked
-              class="absolute w-0 h-0 -z-10 opacity-0"
-            />
-            {#if checked}
-              <i class="iconoir-check text-white text-xs" />
-            {/if}
-          </div> -->
+          <input
+            type="checkbox"
+            bind:checked
+            class="absolute w-0 h-0 -z-10 opacity-0"
+          />
+          {#if checked}
+            <i class="iconoir-check text-white text-xs" />
+          {/if}
+        </div> -->
 
-          <picture class="aspect-square h-full flex items-center justify-center">
-            <img
-              {src}
-              {alt}
-              on:error={() => (error = true)}
-              class="object-cover w-full h-full rounded-lg"
-            />
-          </picture>
+      <picture class="aspect-square h-full flex items-center justify-center">
+        <img
+          {src}
+          {alt}
+          on:error={() => (error = true)}
+          class="object-cover w-full h-full rounded-lg"
+        />
+      </picture>
 
-          <div class="flex flex-grow flex-col gap-0.5 items-start">
-            <div
-              class="w-full flex text-xl items-center gap-1"
-              class:text-red-500={performance === 'low'}
-              class:text-green-500={performance === 'high'}
-              class:text-yellow-500={performance === 'medium'}
-            >
-              {#if performance === 'low'}
-                <i class="iconoir-emoji-talking-angry" />
-              {/if}
-              {#if performance === 'medium'}
-                <i class="iconoir-emoji-surprise-alt" />
-              {/if}
-              {#if performance === 'high'}
-                <i class="iconoir-emoji" />
-              {/if}
-              <span class="text-xs font-bold whitespace-nowrap">
-                {originalLabel}
+      <div class="flex flex-grow flex-col gap-0.5 items-start">
+        <div
+          class="w-full flex text-xl items-center gap-1"
+          class:text-red-500={performance === 'low'}
+          class:text-green-500={performance === 'high'}
+          class:text-yellow-500={performance === 'medium'}
+        >
+          {#if performance === 'low'}
+            <i class="iconoir-emoji-talking-angry" />
+          {/if}
+          {#if performance === 'medium'}
+            <i class="iconoir-emoji-surprise-alt" />
+          {/if}
+          {#if performance === 'high'}
+            <i class="iconoir-emoji" />
+          {/if}
+          <span class="text-xs font-bold whitespace-nowrap">
+            {originalLabel}
+          </span>
+        </div>
+        {#if optimizeImagePromise}
+          {#await optimizeImagePromise then { sizeLabel: newLabel, bytes: newBytes }}
+            <span class="text-xs text-green-500 whitespace-nowrap">
+              {newLabel}
+              <span class="font-bold">
+                ({getPercentageRatio(newBytes, 0, originalSize) - 100}%)
               </span>
-            </div>
-            {#if optimizeImagePromise}
-              {#await optimizeImagePromise then { sizeLabel: newLabel, bytes: newBytes }}
-                <span class="text-xs text-green-500 whitespace-nowrap">
-                  {newLabel}
-                  <span class="font-bold">
-                    ({getPercentageRatio(newBytes, 0, originalBytes) - 100}%)
-                  </span>
-                </span>
-              {/await}
-            {/if}
-          </div>
-        </label>
-        <Button on:click={handleGoToImage} icon color="secondary">
-          <i class="iconoir-eye-empty" />
-        </Button>
-        {#if !optimizeImagePromise}
-          <Button icon on:click={handleOptimizeImage}>
-            <i class="iconoir-magic-wand" />
-          </Button>
-        {:else}
-          {#await optimizeImagePromise}
-            <span class="flex justify-center items-center rounded-md">
-              <Loader />
             </span>
-          {:then}
-            <Button icon on:click={handleDonwloadImage}>
-              <i class="iconoir-download" />
-            </Button>
-          {:catch error}
-            error try again
           {/await}
         {/if}
-        <Button icon on:click={toggleDetails} color="tertiary">
-          <i class="iconoir-nav-arrow-down" class:rotate-180={showDetails} />
+      </div>
+    </label>
+    <Button on:click={handleGoToImage} icon color="secondary">
+      <i class="iconoir-eye-empty" />
+    </Button>
+    {#if !optimizeImagePromise}
+      <Button icon on:click={handleOptimizeImage}>
+        <i class="iconoir-magic-wand" />
+      </Button>
+    {:else}
+      {#await optimizeImagePromise}
+        <span class="flex justify-center items-center rounded-md">
+          <Loader />
+        </span>
+      {:then}
+        <Button icon on:click={handleDonwloadImage}>
+          <i class="iconoir-download" />
         </Button>
       {:catch error}
-        <span>{error.message}</span>
+        error try again
       {/await}
-    </div>
-
-    {#if showDetails}
-      <ItemDetails {height} {width} {originalHeight} {originalWidth} url={src} />
     {/if}
-  </li>
-{/if}
+    <Button icon on:click={toggleDetails} color="tertiary">
+      <i class="iconoir-nav-arrow-down" class:rotate-180={showDetails} />
+    </Button>
+  </div>
+
+  {#if showDetails}
+    <ItemDetails {height} {width} {originalHeight} {originalWidth} url={src} />
+  {/if}
+</li>
