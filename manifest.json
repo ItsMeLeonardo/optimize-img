@@ -7,5 +7,5 @@
     "default_popup": "src/popup/index.html"
   },
   "host_permissions": ["https://*/*"],
-  "permissions": ["storage", "scripting", "activeTab"]
+  "permissions": ["storage", "scripting", "activeTab", "downloads"]
 }

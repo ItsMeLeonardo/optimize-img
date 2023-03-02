@@ -3,15 +3,11 @@
 
   import type { DomImages, CustomImage } from 'src/types'
   import Button from './Button.svelte'
-  import Item from './Item.svelte'
   import { getRemoteImageSize } from '../utils/image'
-
-  type Filters = 'all' | 'low' | 'medium' | 'high'
+  import ItemList from './ItemList.svelte'
 
   let customImages: Promise<CustomImage[]> | undefined
   let domImages: DomImages[] | undefined
-
-  let filter: Filters = 'all'
 
   function getAllImages() {
     const docImages = document.querySelectorAll('img')
@@ -69,10 +65,6 @@
     domImages = images
   }
 
-  function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-  }
-
   async function populateCustomImage() {
     const images: CustomImage[] = []
 
@@ -96,14 +88,11 @@
 
   async function handleClick() {
     await loadContentScript()
-    // images++
-    // getImage()
   }
 
   $: {
     if (domImages) {
       customImages = populateCustomImage()
-      console.log(customImages.then(console.log))
     }
   }
 </script>
@@ -133,48 +122,14 @@
 
   {#if domImages}
     {#if domImages.length}
-      <div class="w-full flex my-2">
-        <button
-          class="flex-grow flex items-center justify-center gap-2 font-bold  rounded py-1 px-4 hover:text-indigo-500"
-          class:bg-white={filter === 'all'}
-          on:click={() => (filter = 'all')}
-        >
-          All
-        </button>
-
-        <button
-          class="flex items-center justify-center gap-2 flex-grow rounded py-1 px-4 hover:text-red-500"
-          class:bg-white={filter === 'low'}
-          class:text-red-500={filter === 'low'}
-          on:click={() => (filter = 'low')}
-        >
-          <span>Low</span>
-          <i class="iconoir-emoji-talking-angry text-xl" />
-        </button>
-
-        <button
-          class="flex items-center justify-center gap-2 flex-grow rounded py-1 px-4 hover:text-yellow-500"
-          class:bg-white={filter === 'medium'}
-          class:text-yellow-500={filter === 'medium'}
-          on:click={() => (filter = 'medium')}
-        >
-          <span>medium</span>
-          <i class="iconoir-emoji-surprise-alt text-xl" />
-        </button>
-
-        <button
-          class="flex items-center justify-center gap-2 flex-grow rounded py-1 px-4 hover:text-green-500"
-          class:bg-white={filter === 'high'}
-          class:text-green-500={filter === 'high'}
-          on:click={() => (filter = 'high')}
-        >
-          <span>high</span>
-          <i class="iconoir-emoji text-xl" />
-        </button>
-      </div>
-
       {#if customImages}
         {#await customImages}
+          <div class="flex w-full gap-4">
+            <span class="h-5 rounded bg-slate-200 flex-grow" />
+            <span class="h-5 rounded bg-slate-200 flex-grow" />
+            <span class="h-5 rounded bg-slate-200 flex-grow" />
+            <span class="h-5 rounded bg-slate-200 flex-grow" />
+          </div>
           <ul class="flex flex-col gap-2">
             {#each domImages as item}
               <li class="w-full rounded-lg">
@@ -203,11 +158,7 @@
             {/each}
           </ul>
         {:then images}
-          <ul class="flex flex-col gap-2">
-            {#each images as image}
-              <Item {image} />
-            {/each}
-          </ul>
+          <ItemList {images} />
         {/await}
       {/if}
     {:else}

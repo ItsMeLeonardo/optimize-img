@@ -4,7 +4,7 @@
   import ButtonCheck from './ButtonCheck.svelte'
   import Input from './Input.svelte'
   import Button from './Button.svelte'
-  import { optimizeImage } from '../service'
+  import { buildOptimizeImageUrl } from '../service'
   import type { ImageFormat, ResizeType } from 'src/types'
 
   export let url: string
@@ -41,7 +41,7 @@
   }
 
   function handleClickDownload() {
-    const resultUrl = optimizeImage({
+    const resultUrl = buildOptimizeImageUrl({
       url,
       format: imageFormat,
       height: newHeight,

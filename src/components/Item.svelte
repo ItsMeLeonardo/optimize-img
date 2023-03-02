@@ -1,8 +1,10 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte'
+
   import type { CustomImage } from 'src/types'
 
   import { getPercentageRatio } from '../utils'
-  import { optimizeImage } from '../service'
+  import { buildOptimizeImageUrl } from '../service'
   import Button from './Button.svelte'
   import Loader from './Loader.svelte'
   import { getRemoteImageSize } from '../utils/image'
@@ -11,9 +13,11 @@
 
   export let image: CustomImage
 
+  const dispatch = createEventDispatcher<{
+    optimize: { url: string }
+  }>()
   // let checked = false
   let showDetails = false
-  let error = false
   let quality = 70
 
   const {
@@ -29,7 +33,7 @@
     sizeLabel: originalLabel,
   } = image
 
-  let optimizedUrl: string = optimizeImage({
+  let optimizedUrl: string = buildOptimizeImageUrl({
     url: src,
     quality,
   })
@@ -64,7 +68,7 @@
   }
 
   async function handleDonwloadImage() {
-    await chrome.tabs.create({
+    chrome.downloads.download({
       url: optimizedUrl,
     })
   }
@@ -73,6 +77,7 @@
 
   async function handleOptimizeImage() {
     optimizeImagePromise = getRemoteImageSize(optimizedUrl)
+    dispatch('optimize', { url: optimizedUrl })
   }
 
   function toggleDetails() {
@@ -104,7 +109,7 @@
         <img
           {src}
           {alt}
-          on:error={() => (error = true)}
+          crossorigin="anonymous"
           class="object-cover w-full h-full rounded-lg"
         />
       </picture>

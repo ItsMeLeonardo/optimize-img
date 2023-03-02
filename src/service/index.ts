@@ -10,7 +10,7 @@ export type OptimizeOptions = {
   format?: ImageFormat
 }
 
-export function optimizeImage(options: OptimizeOptions) {
+export function buildOptimizeImageUrl(options: OptimizeOptions) {
   const { url, format = 'webp', height, quality = 70, width } = options
 
   const image = new CloudinaryImage(url, {

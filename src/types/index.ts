@@ -6,6 +6,8 @@ export type ResizeType = 'PERCETAGE' | 'PIXELS' | 'RENDERED'
 
 export type Performance = 'low' | 'medium' | 'high'
 
+export type Filters = 'all' | 'low' | 'medium' | 'high'
+
 export type Coordinates = {
   top: number
   left: number
