@@ -1,11 +1,13 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte'
   import { slide } from 'svelte/transition'
   import { quintOut } from 'svelte/easing'
+
   import ButtonCheck from './ButtonCheck.svelte'
   import Input from './Input.svelte'
   import Button from './Button.svelte'
   import { buildOptimizeImageUrl } from '../service'
-  import type { ImageFormat, ResizeType } from 'src/types'
+  import type { ImageFormat, OptimizeOptions, ResizeType } from 'src/types'
 
   export let url: string
   export let height: number
@@ -14,14 +16,23 @@
   export let originalHeight: number
   export let originalWidth: number
 
-  let quality = 70
-  let imageFormat: ImageFormat = 'webp'
+  export let optimizeOptions: OptimizeOptions = {
+    format: 'webp',
+    quality: 70,
+  }
 
-  let newHeight = originalHeight
-  let newWidth = originalWidth
+  const dispatch = createEventDispatcher<{
+    optimize: Partial<OptimizeOptions>
+  }>()
 
-  let percentageResize: number | undefined
-  let resizeType: ResizeType | undefined
+  let quality = optimizeOptions.quality
+  let imageFormat: ImageFormat = optimizeOptions.format
+
+  let newHeight = optimizeOptions.newHeight || originalHeight
+  let newWidth = optimizeOptions.newWidth || originalWidth
+
+  let percentageResize: number | undefined = optimizeOptions.percentageResize
+  let resizeType: ResizeType | undefined = optimizeOptions.resizeType
 
   const formats: ImageFormat[] = ['webp', 'jpg', 'png']
   const percentageOptions = [25, 50, 75]
@@ -64,6 +75,17 @@
       newHeight = height
       newWidth = width
     }
+  }
+
+  $: {
+    dispatch('optimize', {
+      format: imageFormat,
+      quality,
+      newHeight,
+      newWidth,
+      percentageResize,
+      resizeType,
+    })
   }
 </script>
 
@@ -169,7 +191,7 @@
     </header>
     <div class="flex gap-2 flex-wrap">
       <div class="w-20">
-        <Input bind:value={quality}>
+        <Input bind:value={quality} max="100" min="1" type="number">
           <i slot="icon" class="iconoir-percentage text-lg" />
         </Input>
       </div>

@@ -1,7 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
+  import debounce from 'just-debounce'
 
-  import type { CustomImage } from 'src/types'
+  import type { CustomImage, OptimizeOptions } from 'src/types'
+
+  import { optimizeImage, addOptimizeOptions, optimizeOptionsList } from '../store'
 
   import { getPercentageRatio } from '../utils'
   import { buildOptimizeImageUrl } from '../service'
@@ -19,6 +22,7 @@
   // let checked = false
   let showDetails = false
   let quality = 70
+  let loading = false
 
   const {
     alt,
@@ -32,6 +36,7 @@
     performance,
     size: originalSize,
     sizeLabel: originalLabel,
+    optimizeResult,
   } = image
 
   let optimizedUrl: string = buildOptimizeImageUrl({
@@ -74,12 +79,19 @@
     })
   }
 
-  let optimizeImagePromise: ReturnType<typeof getRemoteImageSize> | null = null
-
   async function handleOptimizeImage() {
-    optimizeImagePromise = getRemoteImageSize(optimizedUrl)
+    loading = true
+    const result = await getRemoteImageSize(optimizedUrl).finally(() => {
+      loading = false
+    })
+    optimizeImage(id, result)
     dispatch('optimize', { url: optimizedUrl })
   }
+
+  const handleChangeOptimizeOptions = debounce((event: CustomEvent<OptimizeOptions>) => {
+    const options = event.detail
+    addOptimizeOptions(id, options)
+  }, 500)
 
   function toggleDetails() {
     showDetails = !showDetails
@@ -135,37 +147,34 @@
             {originalLabel}
           </span>
         </div>
-        {#if optimizeImagePromise}
-          {#await optimizeImagePromise then { sizeLabel: newLabel, bytes: newBytes }}
-            <span class="text-xs text-green-500 whitespace-nowrap">
-              {newLabel}
-              <span class="font-bold">
-                ({getPercentageRatio(newBytes, 0, originalSize) - 100}%)
-              </span>
+        {#if optimizeResult}
+          <span class="text-xs text-green-500 whitespace-nowrap">
+            {optimizeResult.sizeLabel}
+            <span class="font-bold">
+              ({getPercentageRatio(optimizeResult.bytes, 0, originalSize) - 100}%)
             </span>
-          {/await}
+          </span>
         {/if}
       </div>
     </label>
     <Button on:click={handleGoToImage} icon color="secondary">
       <i class="iconoir-eye-empty" />
     </Button>
-    {#if !optimizeImagePromise}
+
+    {#if loading}
+      <span class="flex justify-center items-center rounded-md">
+        <Loader />
+      </span>
+    {/if}
+
+    {#if !optimizeResult && !loading}
       <Button icon on:click={handleOptimizeImage}>
         <i class="iconoir-magic-wand" />
       </Button>
-    {:else}
-      {#await optimizeImagePromise}
-        <span class="flex justify-center items-center rounded-md">
-          <Loader />
-        </span>
-      {:then}
-        <Button icon on:click={handleDonwloadImage}>
-          <i class="iconoir-download" />
-        </Button>
-      {:catch error}
-        error try again
-      {/await}
+    {:else if !loading}
+      <Button icon on:click={handleDonwloadImage}>
+        <i class="iconoir-download" />
+      </Button>
     {/if}
     <Button icon on:click={toggleDetails} color="tertiary">
       <i class="iconoir-nav-arrow-down" class:rotate-180={showDetails} />
@@ -173,6 +182,14 @@
   </div>
 
   {#if showDetails}
-    <ItemDetails {height} {width} {originalHeight} {originalWidth} url={src} />
+    <ItemDetails
+      {height}
+      {width}
+      {originalHeight}
+      {originalWidth}
+      url={src}
+      optimizeOptions={$optimizeOptionsList.get(id)}
+      on:optimize={handleChangeOptimizeOptions}
+    />
   {/if}
 </li>

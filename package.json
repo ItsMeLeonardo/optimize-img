@@ -33,6 +33,7 @@
   "dependencies": {
     "@cloudinary/url-gen": "1.9.1",
     "file-saver": "2.0.5",
-    "jszip": "3.10.1"
+    "jszip": "3.10.1",
+    "just-debounce": "1.1.0"
   }
 }

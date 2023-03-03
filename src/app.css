@@ -11,6 +11,10 @@
     font-family: 'DM Sans', system-ui, sans-serif;
   }
 
+  ::-webkit-scrollbar {
+    width: 0.125rem;
+  }
+
   input[type='number']::-webkit-outer-spin-button,
   input[type='number']::-webkit-inner-spin-button,
   input[type='number'] {
