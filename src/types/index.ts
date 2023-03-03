@@ -6,7 +6,7 @@ export type ResizeType = 'PERCETAGE' | 'PIXELS' | 'RENDERED'
 
 export type Performance = 'low' | 'medium' | 'high'
 
-export type Filters = 'all' | 'low' | 'medium' | 'high'
+export type Filter = 'all' | 'low' | 'medium' | 'high'
 
 export type Coordinates = {
   top: number
@@ -35,9 +35,16 @@ export type OptimizeOptions = {
   newHeight?: number
 }
 
+export type OptimizeResult = {
+  sizeLabel: string
+  performance: Performance
+  bytes: number
+}
+
 export type CustomImage = {
   size: number
   optimizeOptions?: OptimizeOptions
   performance: Performance
   sizeLabel: string
+  optimizeResult?: OptimizeResult
 } & DomImages

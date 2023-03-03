@@ -13,12 +13,11 @@
     const docImages = document.querySelectorAll('img')
     const imageList = Array.from(docImages)
 
-    imageList.forEach(img => {
-      img.setAttribute('data-extension-id', img.src)
-    })
-
-    const imagesMaped: DomImages[] = imageList.map(img => {
+    const imagesMaped: DomImages[] = imageList.map((img, index) => {
       const { width, height, naturalWidth, naturalHeight, alt, src } = img
+      const id = `${src}-${index}`
+
+      img.setAttribute('data-extension-id', id)
 
       const rect = img.getBoundingClientRect()
 
@@ -30,11 +29,11 @@
       }
 
       return {
+        id,
         src,
         alt,
         width,
         height,
-        id: src,
         coordinates,
         originalWidth: naturalWidth,
         originalHeight: naturalHeight,

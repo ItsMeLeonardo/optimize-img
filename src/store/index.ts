@@ -1,4 +1,6 @@
-import { writable } from 'svelte/store'
+import { writable, derived } from 'svelte/store'
+
+import type { Filter, CustomImage } from 'src/types'
 
 export const optimizedUrls = writable(new Set<string>())
 
@@ -15,3 +17,27 @@ export function removeOptimizedUrl(value: string) {
     return set
   })
 }
+
+export const images = writable<CustomImage[]>([])
+
+export function addImage(value: CustomImage) {
+  images.update(array => {
+    array.push(value)
+    return array
+  })
+}
+
+export function setInitialImages(value: CustomImage[]) {
+  images.set(value)
+}
+
+export const filter = writable<Filter>('all')
+
+export function setFilter(value: Filter) {
+  filter.set(value)
+}
+
+export const imageToShow = derived([images, filter], ([$images, $filters]) => {
+  if ($filters === 'all') return $images
+  return $images.filter(image => image.performance === $filters)
+})

@@ -28,6 +28,7 @@
     src,
     width,
     coordinates,
+    id,
     performance,
     size: originalSize,
     sizeLabel: originalLabel,
@@ -38,11 +39,11 @@
     quality,
   })
 
-  function goToImage(x: number, y: number, src: string) {
+  function goToImage(x: number, y: number, id: string) {
     window.scrollTo(x, y - 100)
 
     const img = document.querySelector(
-      `img[data-extension-id="${src}"]`,
+      `img[data-extension-id="${id}"]`,
     ) as HTMLImageElement
 
     img.animate(
@@ -63,7 +64,7 @@
     chrome.scripting.executeScript({
       target: { tabId: tabs[0].id },
       func: goToImage,
-      args: [coordinates.left, coordinates.top, src],
+      args: [coordinates.left, coordinates.top, id],
     })
   }
 
