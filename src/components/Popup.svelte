@@ -1,13 +1,21 @@
 <script lang="ts">
   import { fade } from 'svelte/transition'
+  import { onMount } from 'svelte'
 
   import type { DomImages, CustomImage } from 'src/types'
+  import storageService from '../service/storage'
+  import { setInitialOptimizeOptionsList, optimizeResultsList } from '../store'
+
   import Button from './Button.svelte'
   import { getRemoteImageSize } from '../utils/image'
   import ItemList from './ItemList.svelte'
 
   let customImages: Promise<CustomImage[]> | undefined
   let domImages: DomImages[] | undefined
+
+  let savedImages: CustomImage[] | undefined
+
+  const { setInitialResults } = optimizeResultsList
 
   function getAllImages() {
     const docImages = document.querySelectorAll('img')
@@ -89,6 +97,32 @@
     await loadContentScript()
   }
 
+  onMount(async () => {
+    const tabs = await chrome.tabs
+      .query({ active: true, currentWindow: true })
+      .catch(err => console.log({ err }))
+
+    if (!tabs) return
+
+    const currentTabUrl = tabs[0].url
+
+    const data = await storageService.getData(currentTabUrl)
+
+    if (data || data.images || data.images.length) {
+      savedImages = data.images
+    }
+
+    if (data.optimizeOptionsList) {
+      const { optimizeOptionsList } = data
+      setInitialOptimizeOptionsList(new Map(optimizeOptionsList))
+    }
+
+    if (data.optimizeResultList) {
+      const { optimizeResultList } = data
+      setInitialResults(new Map(optimizeResultList))
+    }
+  })
+
   $: {
     if (domImages) {
       customImages = populateCustomImage()
@@ -113,11 +147,19 @@
         </p>
         <Button on:click={handleClick}>
           <i class="iconoir-search-window text-xl" />
-          <span>Find images</span>
+          {#if savedImages && savedImages.length}
+            <span>Look Again</span>
+          {:else}
+            <span>Find images</span>
+          {/if}
         </Button>
       </div>
     {/if}
   </div>
+
+  {#if savedImages && savedImages.length && !domImages}
+    <ItemList images={savedImages} />
+  {/if}
 
   {#if domImages}
     {#if domImages.length}

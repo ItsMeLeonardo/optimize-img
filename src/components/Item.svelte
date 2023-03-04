@@ -12,6 +12,7 @@
   import Loader from './Loader.svelte'
 
   import ItemDetails from './ItemDetails.svelte'
+  import storageService from '../service/storage'
 
   export let image: CustomImage
 
@@ -87,10 +88,41 @@
     dispatch('optimize', { url: optimizedUrl })
   }
 
+  function handleDefaultOptimize() {
+    handleOptimizeImage()
+    persistResults()
+  }
+
+  const persistResults = async () => {
+    const tabs = await chrome.tabs
+      .query({ active: true, currentWindow: true })
+      .catch(err => console.log({ err }))
+
+    if (!tabs) return
+
+    const currentTabUrl = tabs[0].url
+
+    storageService.saveOptimizeResultList(currentTabUrl, $optimizeResultList)
+  }
+
+  const persitOptions = async () => {
+    const tabs = await chrome.tabs
+      .query({ active: true, currentWindow: true })
+      .catch(err => console.log({ err }))
+
+    if (!tabs) return
+
+    const currentTabUrl = tabs[0].url
+
+    storageService.saveOptimizeOptionsList(currentTabUrl, $optimizeOptionsList)
+  }
+
   const handleChangeOptimizeOptions = debounce((event: CustomEvent<OptimizeOptions>) => {
     const options = event.detail
     addOptimizeOptions(id, options)
     handleOptimizeImage(options)
+    persitOptions()
+    persistResults()
   }, 500)
 
   function toggleDetails() {
@@ -169,7 +201,7 @@
     {/if}
 
     {#if !$optimizeResultList.get(id) && !loading}
-      <Button icon on:click={() => handleOptimizeImage()}>
+      <Button icon on:click={handleDefaultOptimize}>
         <i class="iconoir-magic-wand" />
       </Button>
     {:else if !loading}

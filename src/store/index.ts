@@ -40,6 +40,10 @@ export const imageToShow = derived([images, filter], ([$images, $filters]) => {
 
 export const optimizeOptionsList = writable(new Map<string, OptimizeOptions>())
 
+export const setInitialOptimizeOptionsList = (value: Map<string, OptimizeOptions>) => {
+  optimizeOptionsList.set(value)
+}
+
 export function addOptimizeOptions(
   id: string,
   optimizeOptions: Partial<OptimizeOptions>,
@@ -47,6 +51,7 @@ export function addOptimizeOptions(
   optimizeOptionsList.update(list => {
     const newOptions = { ...list.get(id), ...optimizeOptions }
     list.set(id, newOptions)
+
     return list
   })
 }
@@ -68,6 +73,10 @@ type imageOption = {
 function createOptimizeResultsList() {
   const optimizeResultList = writable(new Map<string, OptimizeResult>())
   const loadingAllImages = writable(false)
+
+  const setInitialResults = (value: Map<string, OptimizeResult>) => {
+    optimizeResultList.set(value)
+  }
 
   const optimizeImage = async (
     id: string,
@@ -117,6 +126,7 @@ function createOptimizeResultsList() {
     optimizeImage,
     optimizeAllImages,
     resetImage,
+    setInitialResults,
   }
 }
 

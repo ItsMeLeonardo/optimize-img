@@ -1,7 +1,9 @@
 <script lang="ts">
-  import type { CustomImage, Filter } from 'src/types'
+  import type { CustomImage } from 'src/types'
   import Button from './Button.svelte'
   import Item from './Item.svelte'
+
+  import storageService from '../service/storage'
 
   import {
     imageToShow,
@@ -31,9 +33,22 @@
     optimizeAllImages(urlList)
   }
 
+  const persitImages = async () => {
+    const tabs = await chrome.tabs
+      .query({ active: true, currentWindow: true })
+      .catch(err => console.log({ err }))
+
+    if (!tabs) return
+
+    const currentTabUrl = tabs[0].url
+
+    storageService.saveImages(currentTabUrl, images)
+  }
+
   $: {
     if (images) {
       setInitialImages(images)
+      persitImages()
     }
   }
 </script>
@@ -96,7 +111,13 @@
     {#each $imageToShow as image}
       <Item {image} />
     {:else}
-      <li class="w-full rounded-lg bg-white p-5 text-center">No Images</li>
+      <li class="w-full rounded-lg bg-white text-center p-5 ">
+        <span
+          class="font-bold  text-xl text-center text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-red-500 to-orange-500"
+        >
+          No Images
+        </span>
+      </li>
     {/each}
   </ul>
 {/key}
