@@ -108,7 +108,9 @@
 
     const data = await storageService.getData(currentTabUrl)
 
-    if (data || data.images || data.images.length) {
+    if (!data) return
+
+    if (data.images && data.images.length) {
       savedImages = data.images
     }
 

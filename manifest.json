@@ -1,6 +1,6 @@
 {
-  "name": "Svelte Tailwind Chrome Extension",
-  "description": "Sample Extension using Svelte and Tailwind",
+  "name": "Optimize.img",
+  "description": "Extension to optimize images before downloading them.",
   "version": "1.0",
   "manifest_version": 3,
   "action": {
