@@ -24,13 +24,27 @@
     downloadManyImagesFromUrl(Array.from(urls).map(({ url }) => url))
   }
 
+  const persistResults = async () => {
+    const tabs = await chrome.tabs
+      .query({ active: true, currentWindow: true })
+      .catch(err => console.log({ err }))
+
+    if (!tabs) return
+
+    const currentTabUrl = tabs[0].url
+
+    storageService.saveOptimizeResultList(currentTabUrl, $optimizeResultList)
+  }
+
   const handleOptimizeAll = () => {
     const urlList = $imageToShow.map(image => ({
       url: image.src,
       id: image.id,
     }))
 
-    optimizeAllImages(urlList)
+    optimizeAllImages(urlList).then(() => {
+      persistResults()
+    })
   }
 
   const persitImages = async () => {

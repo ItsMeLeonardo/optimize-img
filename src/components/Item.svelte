@@ -89,8 +89,9 @@
   }
 
   function handleDefaultOptimize() {
-    handleOptimizeImage()
-    persistResults()
+    handleOptimizeImage().then(() => {
+      persistResults()
+    })
   }
 
   const persistResults = async () => {
@@ -120,9 +121,10 @@
   const handleChangeOptimizeOptions = debounce((event: CustomEvent<OptimizeOptions>) => {
     const options = event.detail
     addOptimizeOptions(id, options)
-    handleOptimizeImage(options)
     persitOptions()
-    persistResults()
+    handleOptimizeImage(options).then(() => {
+      persistResults()
+    })
   }, 500)
 
   function toggleDetails() {
