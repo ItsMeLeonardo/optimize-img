@@ -4,14 +4,14 @@ import type { Filter, CustomImage, OptimizeResult, OptimizeOptions } from 'src/t
 import { getRemoteImageSize } from '../utils/image'
 import { buildOptimizeImageUrl } from '../service'
 
-export const optimizedUrls = writable(new Set<string>())
+/* export const optimizedUrls = writable(new Set<string>())
 
 export function addOptimizedUrl(value: string) {
   optimizedUrls.update(set => {
     set.add(value)
     return set
   })
-}
+} */
 
 // ------------------------------
 
@@ -69,15 +69,28 @@ function createOptimizeResultsList() {
   const optimizeResultList = writable(new Map<string, OptimizeResult>())
   const loadingAllImages = writable(false)
 
-  const optimizeImage = async (id: string, url: string) => {
+  const optimizeImage = async (
+    id: string,
+    url: string,
+    optimizeOptions?: OptimizeOptions,
+  ) => {
+    const optionsToUse = optimizeOptions || globalOptimizeOptions
+
     const optimizedUrl = buildOptimizeImageUrl({
       url,
-      ...globalOptimizeOptions,
+      ...optionsToUse,
     })
     const result = await getRemoteImageSize(optimizedUrl)
 
     optimizeResultList.update(list => {
       list.set(id, result)
+      return list
+    })
+  }
+
+  const resetImage = (id: string) => {
+    optimizeResultList.update(list => {
+      list.delete(id)
       return list
     })
   }
@@ -103,6 +116,7 @@ function createOptimizeResultsList() {
     loadingAllImages,
     optimizeImage,
     optimizeAllImages,
+    resetImage,
   }
 }
 

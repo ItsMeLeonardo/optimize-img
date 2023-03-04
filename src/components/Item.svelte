@@ -22,7 +22,7 @@
   let quality = 70
   let loading = false
 
-  const { optimizeImage, optimizeResultList } = optimizeResultsList
+  const { optimizeImage, optimizeResultList, resetImage } = optimizeResultsList
 
   const {
     alt,
@@ -78,10 +78,10 @@
     })
   }
 
-  async function handleOptimizeImage() {
+  async function handleOptimizeImage(options?: OptimizeOptions) {
     loading = true
 
-    await optimizeImage(id, src).finally(() => {
+    await optimizeImage(id, src, options).finally(() => {
       loading = false
     })
     dispatch('optimize', { url: optimizedUrl })
@@ -90,6 +90,7 @@
   const handleChangeOptimizeOptions = debounce((event: CustomEvent<OptimizeOptions>) => {
     const options = event.detail
     addOptimizeOptions(id, options)
+    handleOptimizeImage(options)
   }, 500)
 
   function toggleDetails() {
@@ -168,7 +169,7 @@
     {/if}
 
     {#if !$optimizeResultList.get(id) && !loading}
-      <Button icon on:click={handleOptimizeImage}>
+      <Button icon on:click={() => handleOptimizeImage()}>
         <i class="iconoir-magic-wand" />
       </Button>
     {:else if !loading}
@@ -190,6 +191,7 @@
       url={src}
       optimizeOptions={$optimizeOptionsList.get(id)}
       on:optimize={handleChangeOptimizeOptions}
+      on:reset={() => resetImage(id)}
     />
   {/if}
 </li>

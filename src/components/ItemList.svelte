@@ -4,7 +4,6 @@
   import Item from './Item.svelte'
 
   import {
-    addOptimizedUrl,
     imageToShow,
     setInitialImages,
     setFilter,
@@ -16,12 +15,6 @@
   export let images: CustomImage[] = []
 
   const { optimizeAllImages, optimizeResultList } = optimizeResultsList
-
-  function handleOptimizeImage(event: CustomEvent<{ url: string }>) {
-    const { url } = event.detail
-
-    addOptimizedUrl(url)
-  }
 
   const handleDownloadAll = () => {
     const urls = $optimizeResultList.values()
@@ -101,7 +94,7 @@
 {#key $imageToShow}
   <ul class="flex flex-col gap-2">
     {#each $imageToShow as image}
-      <Item {image} on:optimize={handleOptimizeImage} />
+      <Item {image} />
     {:else}
       <li class="w-full rounded-lg bg-white p-5 text-center">No Images</li>
     {/each}

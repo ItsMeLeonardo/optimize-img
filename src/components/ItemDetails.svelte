@@ -23,6 +23,7 @@
 
   const dispatch = createEventDispatcher<{
     optimize: Partial<OptimizeOptions>
+    reset: void
   }>()
 
   let quality = optimizeOptions.quality
@@ -34,21 +35,30 @@
   let percentageResize: number | undefined = optimizeOptions.percentageResize
   let resizeType: ResizeType | undefined = optimizeOptions.resizeType
 
+  let dirty = false
+
+  function setDirty() {
+    if (!dirty) dirty = true
+  }
+
   const formats: ImageFormat[] = ['webp', 'jpg', 'png']
   const percentageOptions = [25, 50, 75]
 
   function handleClickPercetageOption(value: number) {
     percentageResize = value
     resizeType = 'PERCETAGE'
+    setDirty()
   }
 
   function handleClickRenderedOption() {
     resizeType = 'RENDERED'
     percentageResize = undefined
+    setDirty()
   }
 
   function handleInputPixelResize() {
     resizeType = 'PIXELS'
+    setDirty()
   }
 
   function handleClickDownload() {
@@ -60,9 +70,21 @@
       quality,
     })
 
-    chrome.tabs.create({
+    chrome.downloads.download({
       url: resultUrl,
     })
+  }
+
+  function handleClickReset() {
+    dispatch('reset')
+
+    quality = 70
+    imageFormat = 'webp'
+    newHeight = originalHeight
+    newWidth = originalWidth
+    percentageResize = undefined
+    resizeType = undefined
+    dirty = false
   }
 
   $: {
@@ -78,14 +100,16 @@
   }
 
   $: {
-    dispatch('optimize', {
-      format: imageFormat,
-      quality,
-      newHeight,
-      newWidth,
-      percentageResize,
-      resizeType,
-    })
+    if (dirty) {
+      dispatch('optimize', {
+        format: imageFormat,
+        quality,
+        newHeight,
+        newWidth,
+        percentageResize,
+        resizeType,
+      })
+    }
   }
 </script>
 
@@ -149,7 +173,13 @@
         </ButtonCheck>
       {/each}
       <div class="w-20">
-        <Input bind:value={percentageResize} type="number" min={1} max={99}>
+        <Input
+          bind:value={percentageResize}
+          type="number"
+          min={1}
+          max={99}
+          on:input={setDirty}
+        >
           <i slot="icon" class="iconoir-percentage text-lg" />
         </Input>
       </div>
@@ -177,6 +207,7 @@
           checked={format === imageFormat}
           on:click={() => {
             imageFormat = format
+            setDirty()
           }}
         >
           <span class="font-bold text-xs">{format}</span>
@@ -191,12 +222,14 @@
     </header>
     <div class="flex gap-2 flex-wrap">
       <div class="w-20">
-        <Input bind:value={quality} max="100" min="1" type="number">
+        <Input bind:value={quality} max="100" min="1" type="number" on:input={setDirty}>
           <i slot="icon" class="iconoir-percentage text-lg" />
         </Input>
       </div>
     </div>
   </section>
-
-  <Button fullWidth on:click={handleClickDownload}>Download</Button>
+  <footer class="flex gap-1 w-full">
+    <Button fullWidth on:click={handleClickDownload}>Download</Button>
+    <Button fullWidth on:click={handleClickReset}>Reset</Button>
+  </footer>
 </div>
