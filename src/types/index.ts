@@ -39,12 +39,11 @@ export type OptimizeResult = {
   sizeLabel: string
   performance: Performance
   bytes: number
+  url: string
 }
 
 export type CustomImage = {
   size: number
-  optimizeOptions?: OptimizeOptions
   performance: Performance
   sizeLabel: string
-  optimizeResult?: OptimizeResult
 } & DomImages

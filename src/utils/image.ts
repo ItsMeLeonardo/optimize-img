@@ -13,5 +13,6 @@ export async function getRemoteImageSize(src: string): Promise<OptimizeResult> {
     sizeLabel,
     performance,
     bytes,
+    url: src,
   }
 }

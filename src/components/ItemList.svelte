@@ -4,16 +4,18 @@
   import Item from './Item.svelte'
 
   import {
-    optimizedUrls,
     addOptimizedUrl,
     imageToShow,
     setInitialImages,
     setFilter,
     filter,
+    optimizeResultsList,
   } from '../store'
   import { downloadManyImagesFromUrl } from '../utils/download'
 
   export let images: CustomImage[] = []
+
+  const { optimizeAllImages, optimizeResultList } = optimizeResultsList
 
   function handleOptimizeImage(event: CustomEvent<{ url: string }>) {
     const { url } = event.detail
@@ -22,16 +24,18 @@
   }
 
   const handleDownloadAll = () => {
-    optimizedUrls.subscribe(urls => {
-      downloadManyImagesFromUrl(Array.from(urls))
-    })
+    const urls = $optimizeResultList.values()
+
+    downloadManyImagesFromUrl(Array.from(urls).map(({ url }) => url))
   }
 
   const handleOptimizeAll = () => {
-    $imageToShow.forEach(image => {
-      const { src } = image
-      addOptimizedUrl(src)
-    })
+    const urlList = $imageToShow.map(image => ({
+      url: image.src,
+      id: image.id,
+    }))
+
+    optimizeAllImages(urlList)
   }
 
   $: {
@@ -90,7 +94,7 @@
 
   <Button color="tertiary" fullWidth on:click={handleDownloadAll}>
     <span class="text-xs">
-      Download {$optimizedUrls.size}
+      Download {$optimizeResultList.size}
     </span>
   </Button>
 </div>

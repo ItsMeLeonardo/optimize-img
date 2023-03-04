@@ -4,13 +4,12 @@
 
   import type { CustomImage, OptimizeOptions } from 'src/types'
 
-  import { optimizeImage, addOptimizeOptions, optimizeOptionsList } from '../store'
+  import { addOptimizeOptions, optimizeOptionsList, optimizeResultsList } from '../store'
 
   import { getPercentageRatio } from '../utils'
   import { buildOptimizeImageUrl } from '../service'
   import Button from './Button.svelte'
   import Loader from './Loader.svelte'
-  import { getRemoteImageSize } from '../utils/image'
 
   import ItemDetails from './ItemDetails.svelte'
 
@@ -19,10 +18,11 @@
   const dispatch = createEventDispatcher<{
     optimize: { url: string }
   }>()
-  // let checked = false
   let showDetails = false
   let quality = 70
   let loading = false
+
+  const { optimizeImage, optimizeResultList } = optimizeResultsList
 
   const {
     alt,
@@ -36,7 +36,6 @@
     performance,
     size: originalSize,
     sizeLabel: originalLabel,
-    optimizeResult,
   } = image
 
   let optimizedUrl: string = buildOptimizeImageUrl({
@@ -81,10 +80,10 @@
 
   async function handleOptimizeImage() {
     loading = true
-    const result = await getRemoteImageSize(optimizedUrl).finally(() => {
+
+    await optimizeImage(id, src).finally(() => {
       loading = false
     })
-    optimizeImage(id, result)
     dispatch('optimize', { url: optimizedUrl })
   }
 
@@ -147,11 +146,12 @@
             {originalLabel}
           </span>
         </div>
-        {#if optimizeResult}
+        {#if $optimizeResultList.get(id)}
           <span class="text-xs text-green-500 whitespace-nowrap">
-            {optimizeResult.sizeLabel}
+            {$optimizeResultList.get(id).sizeLabel}
             <span class="font-bold">
-              ({getPercentageRatio(optimizeResult.bytes, 0, originalSize) - 100}%)
+              ({getPercentageRatio($optimizeResultList.get(id).bytes, 0, originalSize) -
+                100}%)
             </span>
           </span>
         {/if}
@@ -167,7 +167,7 @@
       </span>
     {/if}
 
-    {#if !optimizeResult && !loading}
+    {#if !$optimizeResultList.get(id) && !loading}
       <Button icon on:click={handleOptimizeImage}>
         <i class="iconoir-magic-wand" />
       </Button>

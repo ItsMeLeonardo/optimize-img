@@ -1,6 +1,8 @@
 import { writable, derived } from 'svelte/store'
 
 import type { Filter, CustomImage, OptimizeResult, OptimizeOptions } from 'src/types'
+import { getRemoteImageSize } from '../utils/image'
+import { buildOptimizeImageUrl } from '../service'
 
 export const optimizedUrls = writable(new Set<string>())
 
@@ -11,12 +13,7 @@ export function addOptimizedUrl(value: string) {
   })
 }
 
-export function removeOptimizedUrl(value: string) {
-  optimizedUrls.update(set => {
-    set.delete(value)
-    return set
-  })
-}
+// ------------------------------
 
 export const images = writable<CustomImage[]>([])
 
@@ -24,27 +21,7 @@ export function setInitialImages(value: CustomImage[]) {
   images.set(value)
 }
 
-export function optimizeImage(id: string, optimizeResult: OptimizeResult) {
-  images.update(images => {
-    const image = images.find(image => image.id === id)
-    if (image) image.optimizeResult = optimizeResult
-    return images
-  })
-}
-
-export function setOptimizeOptions(
-  id: string,
-  optimizeOptions: Partial<OptimizeOptions>,
-) {
-  images.update(images => {
-    const image = images.find(image => image.id === id)
-    if (image) {
-      const newOptions = { ...image.optimizeOptions, ...optimizeOptions }
-      image.optimizeOptions = newOptions
-    }
-    return images
-  })
-}
+// ------------------------------
 
 export const filter = writable<Filter>('all')
 
@@ -52,12 +29,14 @@ export function setFilter(value: Filter) {
   filter.set(value)
 }
 
+// ------------------------------
+
 export const imageToShow = derived([images, filter], ([$images, $filters]) => {
   if ($filters === 'all') return $images
   return $images.filter(image => image.performance === $filters)
 })
 
-// export const optimizeOptions = writable<OptimizeOptions>({})
+// ------------------------------
 
 export const optimizeOptionsList = writable(new Map<string, OptimizeOptions>())
 
@@ -71,3 +50,60 @@ export function addOptimizeOptions(
     return list
   })
 }
+
+// ------------------------------
+
+export const globalOptimizeOptions = writable<OptimizeOptions>({
+  format: 'webp',
+  quality: 70,
+})
+
+// ------------------------------
+
+type imageOption = {
+  id: string
+  url: string
+}
+
+function createOptimizeResultsList() {
+  const optimizeResultList = writable(new Map<string, OptimizeResult>())
+  const loadingAllImages = writable(false)
+
+  const optimizeImage = async (id: string, url: string) => {
+    const optimizedUrl = buildOptimizeImageUrl({
+      url,
+      ...globalOptimizeOptions,
+    })
+    const result = await getRemoteImageSize(optimizedUrl)
+
+    optimizeResultList.update(list => {
+      list.set(id, result)
+      return list
+    })
+  }
+
+  const optimizeAllImages = async (urls: imageOption[]) => {
+    loadingAllImages.set(true)
+
+    const newList = await Promise.all(
+      urls.map(async ({ id, url }) => {
+        const optimizedUrl = buildOptimizeImageUrl({
+          url,
+          ...globalOptimizeOptions,
+        })
+        return getRemoteImageSize(optimizedUrl).then(result => [id, result])
+      }),
+    ).finally(() => loadingAllImages.set(false))
+
+    optimizeResultList.set(new Map(newList as [string, OptimizeResult][]))
+  }
+
+  return {
+    optimizeResultList,
+    loadingAllImages,
+    optimizeImage,
+    optimizeAllImages,
+  }
+}
+
+export const optimizeResultsList = createOptimizeResultsList()
