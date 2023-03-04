@@ -32,8 +32,8 @@
   let newHeight = optimizeOptions.newHeight || originalHeight
   let newWidth = optimizeOptions.newWidth || originalWidth
 
-  let percentageResize: number | undefined = optimizeOptions.percentageResize
-  let resizeType: ResizeType | undefined = optimizeOptions.resizeType
+  let percentageResize: number | null = optimizeOptions.percentageResize || null
+  let resizeType: ResizeType | null = optimizeOptions.resizeType || null
 
   let dirty = false
 
@@ -52,7 +52,7 @@
 
   function handleClickRenderedOption() {
     resizeType = 'RENDERED'
-    percentageResize = undefined
+    percentageResize = null
     setDirty()
   }
 
@@ -82,8 +82,8 @@
     imageFormat = 'webp'
     newHeight = originalHeight
     newWidth = originalWidth
-    percentageResize = undefined
-    resizeType = undefined
+    percentageResize = null
+    resizeType = null
     dirty = false
   }
 

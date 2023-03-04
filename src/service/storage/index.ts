@@ -19,13 +19,13 @@ class StorageService {
 
   async getOptimizeOptionsList(url: string) {
     const result = await this.getData(url)
-    if (!result.optimizeOptionsList) return undefined
+    if (!result.optimizeOptionsList) return null
     return new Map(result.optimizeOptionsList)
   }
 
   async getOptimizeResultList(url: string) {
     const result = await this.getData(url)
-    if (!result.optimizeResultList) return undefined
+    if (!result.optimizeResultList) return null
     return new Map(result.optimizeResultList)
   }
 

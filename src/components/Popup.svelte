@@ -10,10 +10,10 @@
   import { getRemoteImageSize } from '../utils/image'
   import ItemList from './ItemList.svelte'
 
-  let customImages: Promise<CustomImage[]> | undefined
-  let domImages: DomImages[] | undefined
+  let customImages: Promise<CustomImage[]> | null = null
+  let domImages: DomImages[] | null = null
 
-  let savedImages: CustomImage[] | undefined
+  let savedImages: CustomImage[] | null = null
 
   const { setInitialResults } = optimizeResultsList
 
